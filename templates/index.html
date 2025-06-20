@@ -5,544 +5,706 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔐 Password Vault</title>
     
-    <!-- Bootstrap 5 + Custom Theme -->
+    <!-- Optimized CSS Loading -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            --border-radius: 15px;
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --radius: 12px;
+            --success: #28a745;
+            --danger: #dc3545;
         }
         
         body {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
         }
         
         .main-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            margin: 2rem auto;
-            padding: 2rem;
-            max-width: 1000px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin: 1rem;
+            padding: 1.5rem;
+            min-height: calc(100vh - 2rem);
+        }
+        
+        @media (min-width: 768px) {
+            .main-container {
+                margin: 2rem auto;
+                max-width: 1400px;
+            }
         }
         
         .header {
             text-align: center;
             margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
         }
         
         .header h1 {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 700;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            margin: 0;
         }
         
-        .password-table {
-            background: white;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-        }
-        
-        .password-cell {
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-            background: #f8f9fa;
-            padding: 0.75rem;
-            border-radius: 8px;
-            min-width: 200px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .toggle-btn {
-            border: none;
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        }
-        
-        .toggle-btn.showing {
-            background: linear-gradient(45deg, #dc3545, #fd7e14);
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-        
-        .btn-custom {
+        .search-input {
             border-radius: 25px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 0.75rem 1.5rem 0.75rem 3rem;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.2s;
+            width: 100%;
         }
         
-        .btn-add {
-            background: var(--primary-gradient);
-            border: none;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
         
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-        
-        .btn-export {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            border: none;
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-export:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            color: white;
-        }
-        
-        .alert {
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-        }
-        
-        .table > :not(caption) > * > * {
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .table thead th {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
             color: #6c757d;
         }
         
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: #dee2e6;
+        .filters-container {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .password-cell {
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .password-hidden {
+            filter: blur(4px);
+            transition: filter 0.3s;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            font-size: 0.75rem;
+            margin: 0 2px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .toggle-btn {
+            background: var(--success);
+            color: white;
+        }
+        
+        .toggle-btn.showing {
+            background: var(--danger);
+        }
+        
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-favorite {
+            background: #ffc107;
+            color: white;
         }
         
         .copy-btn {
-            border: none;
-            background: linear-gradient(45deg, #17a2b8, #20c997);
-            color: white;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-            margin-left: 0.5rem;
+            background: transparent !important;
+            border: none !important;
+            color: #6c757d;
         }
         
         .copy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+            color: var(--primary);
         }
         
-        .copy-btn.copied {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        .strength-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
         
-        .service-cell {
+        .strength-very-weak { background: var(--danger); color: white; }
+        .strength-weak { background: #fd7e14; color: white; }
+        .strength-fair { background: #ffc107; color: #333; }
+        .strength-good { background: #20c997; color: white; }
+        .strength-strong { background: var(--success); color: white; }
+        
+        .favorite-star {
+            color: #ffd700;
+        }
+        
+        .bulk-actions-bar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+        
+        .no-passwords {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        
+        .no-passwords i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 991.98px) {
+            .desktop-table { display: none !important; }
+            .mobile-cards { display: block !important; }
+        }
+        
+        @media (min-width: 992px) {
+            .desktop-table { display: block !important; }
+            .mobile-cards { display: none !important; }
+        }
+        
+        .password-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            padding: 1rem;
+        }
+        
+        .card-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
         }
         
-        .password-container {
+        .card-row {
             display: flex;
-            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        /* Loading and success states */
+        .loading { opacity: 0.6; pointer-events: none; }
+        
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="main-container">
             <div class="header">
                 <h1><i class="fas fa-shield-alt"></i> Password Vault</h1>
-                <p class="text-muted">Secure • Encrypted • Private</p>
-                <div class="user-info">
-                    <span class="text-muted">Welcome, <strong>{{ current_user.username }}</strong></span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm ms-2">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                </div>
+                <p class="text-muted mb-0">Secure password management made easy</p>
             </div>
 
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="mb-4">
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} fade-in">
-                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
-                                {{ message }}
+            <!-- Search -->
+            <div class="position-relative mb-3">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="form-control search-input" 
+                       placeholder="Search passwords..." 
+                       value="{{ request.args.get('search', '') }}" id="searchInput">
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-container">
+                <form method="GET" id="filterForm">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for cat in ['General', 'Personal', 'Work', 'Banking', 'Social', 'Shopping', 'Entertainment', 'Travel', 'Health'] %}
+                                <option value="{{ cat }}" {{ 'selected' if request.args.get('category') == cat }}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sort_by" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort_by" name="sort_by">
+                                <option value="created_at" {{ 'selected' if request.args.get('sort_by', 'created_at') == 'created_at' }}>Date Created</option>
+                                <option value="label" {{ 'selected' if request.args.get('sort_by') == 'label' }}>Name</option>
+                                <option value="last_accessed" {{ 'selected' if request.args.get('sort_by') == 'last_accessed' }}>Last Used</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sort_order" class="form-label">Order</label>
+                            <select class="form-select" id="sort_order" name="sort_order">
+                                <option value="desc" {{ 'selected' if request.args.get('sort_order', 'desc') == 'desc' }}>Newest First</option>
+                                <option value="asc" {{ 'selected' if request.args.get('sort_order') == 'asc' }}>Oldest First</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="favoritesOnly" name="favorites_only" value="1" 
+                                       {{ 'checked' if request.args.get('favorites_only') }}>
+                                <label class="form-check-label" for="favoritesOnly">Favorites Only</label>
                             </div>
-                        {% endfor %}
+                        </div>
+                        <div class="col-md-2">
+                            <a href="{{ url_for('add_password') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-plus"></i> Add Password
+                            </a>
+                        </div>
                     </div>
-                {% endif %}
-            {% endwith %}
-
-            <!-- Add Button -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="mb-0">Your Passwords</h3>
-                <div class="btn-group" role="group">
-                    <a href="{{ url_for('export_csv') }}" class="btn btn-export btn-custom me-2">
-                        <i class="fas fa-download"></i> Export CSV
-                    </a>
-                    <a href="{{ url_for('add_password') }}" class="btn btn-add btn-custom">
-                        <i class="fas fa-plus"></i> Add New Password
-                    </a>
-                </div>
+                </form>
             </div>
 
-            <!-- Password Table -->
-            {% if rows %}
-                <div class="password-table">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th><i class="fas fa-tag"></i> Service</th>
-                                <th><i class="fas fa-key"></i> Password</th>
-                                <th><i class="fas fa-cogs"></i> Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in rows %}
-                            <tr data-password-id="{{ row.id }}" class="password-row">
-                                <td class="align-middle">
-                                    <div class="service-cell">
-                                        {% if row.is_file %}
-                                            <strong class="service-name">
-                                                <i class="fas fa-file"></i> {{ row.label }}
-                                            </strong>
-                                        {% else %}
-                                            <strong class="service-name">{{ row.label }}</strong>
-                                        {% endif %}
-                                        <button class="copy-btn" 
-                                                data-copy-text="{{ row.label }}" 
-                                                title="Copy Service Name"
-                                                type="button">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="align-middle">
-                                    {% if row.is_file %}
-                                        <div class="password-container">
-                                            <div class="password-cell">
-                                                <span class="file-info">
-                                                    <strong>{{ row.file_name }}</strong><br>
-                                                    <small class="text-muted">
-                                                        {{ (row.file_size / 1024) | round(1) }} KB
-                                                        {% if row.file_type %}
-                                                            • {{ row.file_type.split('/')[0] }}
-                                                        {% endif %}
-                                                    </small>
-                                                </span>
+            {% if passwords %}
+                <!-- Bulk actions bar (hidden by default) -->
+                <div id="bulkActionsBar" class="bulk-actions-bar" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><strong id="selectedCount">0</strong> passwords selected</span>
+                        <div>
+                            <button type="button" class="btn btn-outline-light btn-sm me-2" id="exportSelectedBtn">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm me-2" id="favoriteSelectedBtn">
+                                <i class="fas fa-star"></i> Favorite
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm me-2" id="deleteSelectedBtn">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="clearSelectionBtn">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desktop Table View -->
+                <div class="desktop-table">
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox" class="form-check-input" id="selectAll">
+                                        </th>
+                                        <th style="width: 30%;">SERVICE</th>
+                                        <th style="width: 15%;">CATEGORY</th>
+                                        <th style="width: 25%;">PASSWORD / FILE</th>
+                                        <th style="width: 12%;">STRENGTH</th>
+                                        <th style="width: 12%;">LAST USED</th>
+                                        <th style="width: 6%;">ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pwd in passwords %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input password-checkbox" value="{{ pwd.id }}">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if pwd.is_favorite %}
+                                                    <i class="fas fa-star favorite-star me-2"></i>
+                                                {% endif %}
+                                                <div>
+                                                    <div class="fw-semibold">{{ pwd.label }}</div>
+                                                    {% if pwd.url %}
+                                                        <small class="text-muted">{{ pwd.url[:30] }}...</small>
+                                                    {% endif %}
+                                                </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm category-dropdown" data-pid="{{ pwd.id }}">
+                                                {% for cat in ['General', 'Personal', 'Work', 'Banking', 'Social', 'Shopping', 'Entertainment', 'Travel', 'Health'] %}
+                                                <option value="{{ cat }}" {{ 'selected' if (pwd.category or 'General') == cat }}>{{ cat }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            {% if pwd.is_file %}
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-file text-info me-2"></i>
+                                                    <span class="text-truncate">{{ pwd.file_name }}</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="d-flex align-items-center">
+                                                    <div class="password-cell password-hidden me-2" data-pid="{{ pwd.id }}">
+                                                        ••••••••••••
+                                                    </div>
+                                                    <button class="copy-btn" data-pid="{{ pwd.id }}" title="Copy Password">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not pwd.is_file %}
+                                                {% set strength_class = {0: 'very-weak', 1: 'weak', 2: 'fair', 3: 'good', 4: 'strong'}.get(pwd.password_strength, 'very-weak') %}
+                                                <span class="strength-indicator strength-{{ strength_class }}">
+                                                    {{ {0: 'Very Weak', 1: 'Weak', 2: 'Fair', 3: 'Good', 4: 'Strong'}.get(pwd.password_strength, 'Very Weak') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ pwd.last_accessed.split(' ')[0] if pwd.last_accessed else 'Never' }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                {% if not pwd.is_file %}
+                                                    <button class="toggle-btn action-btn" data-pid="{{ pwd.id }}" title="Show/Hide">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <a href="{{ url_for('edit_password', pid=pwd.id) }}" class="btn-edit action-btn" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST" action="{{ url_for('toggle_favorite', pid=pwd.id) }}" class="d-inline">
+                                                    <button type="submit" class="btn-favorite action-btn" title="Favorite">
+                                                        <i class="fas fa-star"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('delete_password', pid=pwd.id) }}" class="d-inline" onsubmit="return confirm('Delete?')">
+                                                    <button type="submit" class="btn-delete action-btn" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="mobile-cards">
+                    {% for pwd in passwords %}
+                    <div class="password-card">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <input type="checkbox" class="form-check-input me-2 password-checkbox" value="{{ pwd.id }}">
+                                <h5 class="mb-0">
+                                    {% if pwd.is_favorite %}
+                                        <i class="fas fa-star favorite-star me-1"></i>
+                                    {% endif %}
+                                    {{ pwd.label }}
+                                </h5>
+                            </div>
+                            <div>
+                                {% if not pwd.is_file %}
+                                    <button class="toggle-btn action-btn" data-pid="{{ pwd.id }}" title="Show/Hide">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                {% endif %}
+                                <a href="{{ url_for('edit_password', pid=pwd.id) }}" class="btn-edit action-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_password', pid=pwd.id) }}" class="d-inline" onsubmit="return confirm('Delete?')">
+                                    <button type="submit" class="btn-delete action-btn" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="card-row">
+                                <span class="card-label">Category:</span>
+                                <select class="form-select form-select-sm category-dropdown" data-pid="{{ pwd.id }}" style="width: auto;">
+                                    {% for cat in ['General', 'Personal', 'Work', 'Banking', 'Social', 'Shopping', 'Entertainment', 'Travel', 'Health'] %}
+                                    <option value="{{ cat }}" {{ 'selected' if (pwd.category or 'General') == cat }}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="card-row">
+                                <span class="card-label">
+                                    {% if pwd.is_file %}File:{% else %}Password:{% endif %}
+                                </span>
+                                <div>
+                                    {% if pwd.is_file %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file text-info me-1"></i>
+                                            <span>{{ pwd.file_name }}</span>
                                         </div>
                                     {% else %}
-                                        <div class="password-container">
-                                            <div class="password-cell">
-                                                <span class="password-display">••••••••••••</span>
+                                        <div class="d-flex align-items-center">
+                                            <div class="password-cell password-hidden me-2" data-pid="{{ pwd.id }}">
+                                                ••••••••••••
                                             </div>
-                                            <button class="copy-btn copy-password-btn" 
-                                                    data-password-id="{{ row.id }}" 
-                                                    title="Copy Password"
-                                                    type="button">
+                                            <button class="copy-btn" data-pid="{{ pwd.id }}" title="Copy Password">
                                                 <i class="fas fa-copy"></i>
                                             </button>
                                         </div>
                                     {% endif %}
-                                </td>
-                                <td class="align-middle">
-                                    <div class="action-buttons">
-                                        {% if row.is_file %}
-                                            <a href="{{ url_for('view_file', pid=row.id) }}" 
-                                               class="btn btn-outline-info btn-sm btn-custom" 
-                                               title="View File">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ url_for('download_file', pid=row.id) }}" 
-                                               class="btn btn-outline-success btn-sm btn-custom" 
-                                               title="Download File">
-                                                <i class="fas fa-download"></i>
-                                            </a>
-                                        {% else %}
-                                            <button class="toggle-btn" 
-                                                    data-password-id="{{ row.id }}" 
-                                                    title="Show/Hide Password"
-                                                    type="button">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <a href="{{ url_for('edit_password', pid=row.id) }}" 
-                                               class="btn btn-outline-primary btn-sm btn-custom" 
-                                               title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        {% endif %}
-                                        <form method="post" 
-                                              action="{{ url_for('delete_password', pid=row.id) }}" 
-                                              style="display: inline-block;"
-                                              onsubmit="return confirm('⚠️ Are you sure you want to delete this {{ 'file' if row.is_file else 'password' }}?')">
-                                            <button type="submit" 
-                                                    class="btn btn-outline-danger btn-sm btn-custom" 
-                                                    title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </div>
+                            </div>
+                            
+                            {% if not pwd.is_file %}
+                            <div class="card-row">
+                                <span class="card-label">Strength:</span>
+                                {% set strength_class = {0: 'very-weak', 1: 'weak', 2: 'fair', 3: 'good', 4: 'strong'}.get(pwd.password_strength, 'very-weak') %}
+                                <span class="strength-indicator strength-{{ strength_class }}">
+                                    {{ {0: 'Very Weak', 1: 'Weak', 2: 'Fair', 3: 'Good', 4: 'Strong'}.get(pwd.password_strength, 'Very Weak') }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-lock"></i>
-                    <h4>No passwords stored yet</h4>
-                    <p>Click "Add New Password" to get started!</p>
+                <div class="no-passwords">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>No Passwords Found</h3>
+                    <p>Start securing your digital life by adding your first password!</p>
+                    <a href="{{ url_for('add_password') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Your First Password
+                    </a>
                 </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- Optimized JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        console.log('🔐 Password Vault loaded');
-        
-        // Copy functionality
-        async function copyToClipboard(text) {
-            try {
-                await navigator.clipboard.writeText(text);
-                return true;
-            } catch (err) {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    return true;
-                } catch (fallbackErr) {
-                    document.body.removeChild(textArea);
-                    console.error('Failed to copy text: ', fallbackErr);
-                    return false;
-                }
-            }
-        }
-
-        function showCopyFeedback(button, success = true) {
-            const icon = button.querySelector('i');
-            const originalClass = icon.className;
-            
-            if (success) {
-                button.classList.add('copied');
-                icon.className = 'fas fa-check';
-                setTimeout(() => {
-                    button.classList.remove('copied');
-                    icon.className = originalClass;
-                }, 2000);
-            } else {
-                icon.className = 'fas fa-times';
-                setTimeout(() => {
-                    icon.className = originalClass;
-                }, 2000);
-            }
-        }
-
-        // Copy service name functionality
-        document.addEventListener('click', async function(event) {
-            const copyBtn = event.target.closest('.copy-btn:not(.copy-password-btn)');
-            if (copyBtn) {
-                event.preventDefault();
-                const textToCopy = copyBtn.getAttribute('data-copy-text');
-                const success = await copyToClipboard(textToCopy);
-                showCopyFeedback(copyBtn, success);
-                
-                if (success) {
-                    console.log('✅ Service name copied to clipboard:', textToCopy);
+        // Optimized search with debouncing
+        let searchTimeout;
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const url = new URL(window.location);
+                if (this.value) {
+                    url.searchParams.set('search', this.value);
                 } else {
-                    console.error('❌ Failed to copy service name');
-                    alert('❌ Failed to copy service name to clipboard');
+                    url.searchParams.delete('search');
                 }
-                return;
-            }
-            
-            // Copy password functionality
-            const copyPasswordBtn = event.target.closest('.copy-password-btn');
-            if (copyPasswordBtn) {
-                event.preventDefault();
-                const passwordId = copyPasswordBtn.getAttribute('data-password-id');
-                
-                try {
-                    copyPasswordBtn.classList.add('loading');
-                    console.log('Fetching password for copy...');
-                    
-                    const response = await fetch(`/password/${passwordId}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    if (data.password) {
-                        const success = await copyToClipboard(data.password);
-                        showCopyFeedback(copyPasswordBtn, success);
-                        
-                        if (success) {
-                            console.log('✅ Password copied to clipboard');
-                        } else {
-                            throw new Error('Clipboard copy failed');
-                        }
-                    } else {
-                        throw new Error('No password in response');
-                    }
-                } catch (error) {
-                    console.error('Error copying password:', error);
-                    showCopyFeedback(copyPasswordBtn, false);
-                    alert('❌ Failed to copy password: ' + error.message);
-                } finally {
-                    copyPasswordBtn.classList.remove('loading');
-                }
-                return;
+                window.location.href = url.toString();
+            }, 300);
+        });
+
+        // Auto-submit filters
+        ['category', 'sort_by', 'sort_order', 'favoritesOnly'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', () => document.getElementById('filterForm').submit());
             }
         });
 
-        // Password toggle functionality
-        document.addEventListener('click', async function(event) {
-            const toggleBtn = event.target.closest('.toggle-btn');
-            if (!toggleBtn) return;
-            
-            event.preventDefault();
-            
-            const passwordId = toggleBtn.getAttribute('data-password-id');
-            const row = document.querySelector(`tr[data-password-id="${passwordId}"]`);
-            const passwordDisplay = row.querySelector('.password-display');
-            const icon = toggleBtn.querySelector('i');
-            
-            console.log('Toggle clicked for password ID:', passwordId);
-            
-            // Check current state
-            const isShowing = toggleBtn.classList.contains('showing');
-            
-            if (!isShowing) {
-                // Show password
+        // Category update
+        document.querySelectorAll('.category-dropdown').forEach(select => {
+            select.addEventListener('change', async function() {
+                const pid = this.dataset.pid;
+                const category = this.value;
+                
                 try {
-                    toggleBtn.classList.add('loading');
-                    console.log('Fetching password...');
+                    const response = await fetch(`/update-category/${pid}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ category })
+                    });
                     
-                    const response = await fetch(`/password/${passwordId}`);
-                    console.log('Response status:', response.status);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('Password data received');
-                    
-                    if (data.password) {
-                        passwordDisplay.textContent = data.password;
-                        toggleBtn.classList.add('showing');
-                        icon.className = 'fas fa-eye-slash';
-                        toggleBtn.title = 'Hide Password';
-                        
-                        // Auto-hide after 30 seconds
-                        setTimeout(() => {
-                            if (toggleBtn.classList.contains('showing')) {
-                                hidePassword(toggleBtn, passwordDisplay, icon);
-                            }
-                        }, 30000);
-                    } else {
-                        throw new Error('No password in response');
-                    }
+                    if (!response.ok) throw new Error('Failed to update');
+                    showNotification('Category updated!', 'success');
                 } catch (error) {
-                    console.error('Error fetching password:', error);
-                    alert('❌ Failed to fetch password: ' + error.message);
-                } finally {
-                    toggleBtn.classList.remove('loading');
+                    showNotification('Failed to update category', 'error');
+                    console.error(error);
                 }
-            } else {
-                // Hide password
-                hidePassword(toggleBtn, passwordDisplay, icon);
-            }
-        });
-        
-        function hidePassword(toggleBtn, passwordDisplay, icon) {
-            passwordDisplay.textContent = '••••••••••••';
-            toggleBtn.classList.remove('showing');
-            icon.className = 'fas fa-eye';
-            toggleBtn.title = 'Show Password';
-        }
-        
-        // Add some nice animations
-        document.addEventListener('DOMContentLoaded', function() {
-            const rows = document.querySelectorAll('.password-row');
-            rows.forEach((row, index) => {
-                row.style.animationDelay = `${index * 0.1}s`;
-                row.classList.add('fade-in');
             });
         });
+
+        // Optimized password toggle
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const pid = this.dataset.pid;
+                const passwordCell = document.querySelector(`.password-cell[data-pid="${pid}"]`);
+                const icon = this.querySelector('i');
+                
+                if (passwordCell.classList.contains('password-hidden')) {
+                    try {
+                        this.disabled = true;
+                        const response = await fetch(`/password/${pid}`);
+                        const data = await response.json();
+                        
+                        if (data.password) {
+                            passwordCell.textContent = data.password;
+                            passwordCell.classList.remove('password-hidden');
+                            this.classList.add('showing');
+                            icon.className = 'fas fa-eye-slash';
+                        }
+                    } catch (error) {
+                        showNotification('Error loading password', 'error');
+                    } finally {
+                        this.disabled = false;
+                    }
+                } else {
+                    passwordCell.textContent = '••••••••••••';
+                    passwordCell.classList.add('password-hidden');
+                    this.classList.remove('showing');
+                    icon.className = 'fas fa-eye';
+                }
+            });
+        });
+
+        // Optimized copy functionality
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const pid = this.dataset.pid;
+                const passwordCell = document.querySelector(`.password-cell[data-pid="${pid}"]`);
+                
+                try {
+                    let passwordText;
+                    
+                    if (passwordCell.classList.contains('password-hidden')) {
+                        const response = await fetch(`/password/${pid}`);
+                        const data = await response.json();
+                        passwordText = data.password;
+                    } else {
+                        passwordText = passwordCell.textContent;
+                    }
+                    
+                    if (passwordText) {
+                        await navigator.clipboard.writeText(passwordText);
+                        showNotification('Password copied!', 'success');
+                        
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check text-success"></i>';
+                        setTimeout(() => this.innerHTML = originalHTML, 1000);
+                    }
+                } catch (error) {
+                    showNotification('Failed to copy', 'error');
+                }
+            });
+        });
+
+        // Bulk selection (optimized)
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const passwordCheckboxes = document.querySelectorAll('.password-checkbox');
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCountSpan = document.getElementById('selectedCount');
         
-        console.log('✅ Password Vault JavaScript initialized');
+        selectAllCheckbox?.addEventListener('change', function() {
+            passwordCheckboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkActionsBar();
+        });
+        
+        passwordCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateBulkActionsBar);
+        });
+        
+        function updateBulkActionsBar() {
+            const count = document.querySelectorAll('.password-checkbox:checked').length;
+            bulkActionsBar.style.display = count > 0 ? 'block' : 'none';
+            selectedCountSpan.textContent = count;
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `copy-success alert alert-${type === 'success' ? 'success' : 'danger'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = '{{ url_for("add_password") }}';
+            }
+        });
+
+        console.log('✅ Password Vault optimized and ready');
     </script>
 </body>
+</html> 
 </html> 

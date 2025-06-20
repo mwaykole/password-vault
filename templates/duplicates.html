@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Passwords - Password Vault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .duplicate-group {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+        }
+        .duplicate-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
+        .duplicate-item {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .no-duplicates {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">
+                                <i class="fas fa-copy me-2"></i>Duplicate Passwords
+                            </h2>
+                            <a href="{{ url_for('index') }}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Vault
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        {% if duplicates %}
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Security Warning:</strong> You have {{ duplicates|length }} duplicate password(s).
+                            </div>
+                            
+                            {% for password, entries in duplicates.items() %}
+                            <div class="duplicate-group">
+                                <div class="duplicate-header">
+                                    <h5 class="mb-0">
+                                        Duplicate Password (Used {{ entries|length }} times)
+                                    </h5>
+                                </div>
+                                
+                                {% for entry in entries %}
+                                <div class="duplicate-item">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-1">{{ entry.label }}</h6>
+                                            <small class="text-muted">ID: {{ entry.id }}</small>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <a href="{{ url_for('edit_password', pid=entry.id) }}" 
+                                               class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                            
+                        {% else %}
+                            <div class="no-duplicates">
+                                <i class="fas fa-shield-alt fa-4x text-success mb-3"></i>
+                                <h3>No Duplicate Passwords Found!</h3>
+                                <p class="lead">All your passwords are unique.</p>
+                                <a href="{{ url_for('password_generator') }}" class="btn btn-primary mt-3">
+                                    <i class="fas fa-key me-2"></i>Generate New Password
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
